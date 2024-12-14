@@ -15,20 +15,26 @@ fn part1(input: &str, x_size: usize, y_size: usize) -> u32 {
     }
 
     for robot in robots {
-        let final_x;
-        let final_y;
+        let mut final_x;
+        let mut final_y;
+
         if robot[2] > 0 {
             final_x = (robot[0] + robot[2] * 100) % x_size as i32;
         } else {
-            final_x = x_size as i32 - ((robot[0] + robot[2] * 100).abs() % x_size as i32);
+            final_x = x_size as i32 + ((robot[0] + robot[2] * 100) % x_size as i32);
+            if final_x == x_size as i32 {
+                final_x = 0;
+            }
         }
+
         if robot[3] > 0 {
             final_y = (robot[1] + robot[3] * 100) % y_size as i32;
         } else {
-            final_y = y_size as i32 - ((robot[1] + robot[3] * 100).abs() % y_size as i32);
+            final_y = y_size as i32 + ((robot[1] + robot[3] * 100) % y_size as i32);
+            if final_y == y_size as i32 {
+                final_y = 0;
+            }
         }
-
-        println!("{}:{}", final_x, final_y);
 
         last_positions.push((final_x, final_y));
     }
@@ -39,17 +45,16 @@ fn part1(input: &str, x_size: usize, y_size: usize) -> u32 {
         if position.0 > (x_size / 2) as i32 {
             quadrant_to_go += 1;
         }
-        if position.1 > (y_size / 1) as i32 {
+        if position.1 > (y_size / 2) as i32 {
             quadrant_to_go += 2;
         }
-        if position.0 != (x_size / 2) as i32 || position.1 != (y_size / 2) as i32 {
+        if position.0 != (x_size / 2) as i32 && position.1 != (y_size / 2) as i32 {
             quadrant_risk[quadrant_to_go] += 1;
         }
     }
     let mut result = 1;
 
     for q in quadrant_risk {
-        println!("{}", q);
         result *= q;
     }
 
@@ -57,7 +62,7 @@ fn part1(input: &str, x_size: usize, y_size: usize) -> u32 {
 }
 
 fn main() {
-    part1("input_test.txt", 13, 11);
+    println!("{}", part1("input.txt", 101, 103));
 }
 
 #[cfg(test)]
