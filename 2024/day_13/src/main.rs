@@ -1,4 +1,4 @@
-use std::fs;
+use std::{cmp::{max, min}, fs};
 
 use regex::Regex;
 
@@ -52,6 +52,7 @@ fn part1(input: &str) -> u64 {
     return final_value;
 }
 
+
 fn part2(input: &str) -> u64 {
     // (A.X, A.Y, B.X, B.Y, res.X, res.Y)
     let mut arcades: Vec<Vec<u64>> = vec![];
@@ -74,33 +75,6 @@ fn part2(input: &str) -> u64 {
         println!("{}:{}", arc_index, arc_len);
         arc[4] += 10000000000000;
         arc[5] += 10000000000000;
-        let mut a_number: u64 = 0;
-        let mut b_number: u64 = 1000000000000;
-        loop {
-            let calc_x = a_number * arc[0] + b_number * arc[2];
-            let calc_y = a_number * arc[1] + b_number * arc[3];
-
-            if calc_x == arc[4] && calc_y == arc[5] {
-                final_value += a_number * 3 + b_number;
-                a_number = 120;
-            } else if calc_x < arc[4] && calc_y < arc[5] {
-                a_number += 1;
-            } else if b_number == 0 {
-                break;
-            } else if calc_x > arc[4] && calc_y < arc[5] {
-                a_number += 1;
-                b_number -= 1;
-            } else if calc_x < arc[4] && calc_y > arc[5] {
-                a_number += 1;
-                b_number -= 1;
-            } else if calc_x > arc[4] && calc_y > arc[5] {
-                b_number -= 1;
-            } else if calc_x + calc_y < arc[4] + arc[5] {
-                a_number += 1;
-            } else {
-                b_number -= 1;
-            }
-        }
     }
 
     return final_value;
