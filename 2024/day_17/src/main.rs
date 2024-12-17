@@ -63,15 +63,30 @@ fn part1(val_reg_a: u64, val_reg_b: u64, val_reg_c: u64, instr: &str) -> String 
 fn part2(val_reg_a: u64, val_reg_b: u64, val_reg_c: u64, instr: &str) -> u64 {
     let mut a: u64 = 0;
     loop {
-        if part1(a, val_reg_b, val_reg_c, instr) == instr {
-            if a != val_reg_a {
+        loop {
+            let result = part1(a, val_reg_b, val_reg_c, instr);
+            if instr.ends_with(&result) {
                 break;
             }
+            a += 1;
         }
-        a += 1;
+        if part1(a, val_reg_b, val_reg_c, instr) == instr {
+            break;
+        }
+        a = a << 3;
     }
     return a;
 }
+/*
+* 2,4: b = a % 8
+* 1,5: b = b ^ 5
+* 7,5: c = a >> b
+* 0,3: a = a >> 3
+* 4,1: b = b ^ c
+* 1,6: b = b ^ 6
+* 5,5: out += b % 8
+* 3,0: goto 2,4 if A != 0 else continue
+*/
 
 fn main() {
     println!(
