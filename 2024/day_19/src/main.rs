@@ -1,10 +1,6 @@
 use regex::Regex;
-use std::{
-    cmp::min,
-    collections::{HashMap, HashSet},
-    fs,
-    os::unix::fs::PermissionsExt,
-};
+use std::{cmp::min, collections::HashSet, fs, os::unix::fs::PermissionsExt};
+use cached::proc_macro::cached;
 
 fn recursion_part1(combination: String, towels: &HashSet<&str>, max_len: usize) -> bool {
     // println!("{}", combination);
@@ -64,49 +60,27 @@ fn part1(input: &str) -> u32 {
 
     return result;
 }
-fn recursion_part2_create_set(combination: String, towels: &HashSet<&str>, max_len: usize) -> u32 {
+
+fn recursion_part2(combination: String, towels: &HashSet<&str>, max_len: usize) -> u32 {
     if combination.len() == 0 {
         return 1;
     }
 
     let mut inner_result: u32 = 0;
-    for i in min(max_len, combination.len()) + 1..0 {
+    for i in 1..min(max_len, combination.len()) + 1 {
         let this_slice: &str = &combination[0..i];
 
         match towels.get(this_slice) {
             Some(res) => {
-                inner_result +=
-                    recursion_part2_create_set(combination[i..].to_string(), towels, max_len);
+                inner_result = inner_result
+                    + recursion_part2(
+                        combination[i..].to_string(),
+                        towels,
+                        max_len,
+                    );
             }
             None => {}
         }
-    }
-
-    return inner_result;
-}
-
-fn recursion_part2(combination: String, towels: &HashMap<&str, u32>, max_len: usize) -> u32 {
-    if combination.len() == 0 {
-        return 1;
-    }
-
-    let mut inner_result: u32 = 0;
-    let mut i = min(max_len, combination.len());
-    while i != 0{
-    // for i in  + 1..0 {
-        let this_slice: &str = &combination[0..i];
-
-        match towels.get(this_slice) {
-            Some(res) => {
-                let fun_result = recursion_part2(combination[i..].to_string(), towels, max_len);
-                if fun_result != 0 {
-                    inner_result = fun_result * res;
-                }
-                break;
-            }
-            None => {}
-        }
-        i -= 1;
     }
 
     return inner_result;
@@ -132,23 +106,13 @@ fn part2(input: &str) -> u32 {
     }
 
     let mut result: u32 = 0;
-    let mut towel_ultra: HashMap<&str, u32> = HashMap::new();
-    for towel in &towels {
-        towel_ultra.insert(
-            towel,
-            recursion_part2_create_set(towel.to_string(), &towels, longest_towel) + 1,
-        );
-    }
-    for towel in &towel_ultra {
-        println!("{}:{}", towel.0, towel.1)
-    }
-
     for (line_index, line) in parts[1].lines().enumerate() {
-        let rec_result = recursion_part2(line.to_string(), &towel_ultra, longest_towel);
+        let rec_result =  recursion_part2(line.to_string(), &towels, longest_towel);
+        println!("{}", rec_result);
         result += rec_result;
     }
     return result;
-
+    
     // TEST PURPOSES
     // let rec_result =  recursion_part2("rrbgbr".to_string(), &towels, longest_towel);
     // return rec_result

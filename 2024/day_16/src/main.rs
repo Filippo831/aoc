@@ -1,7 +1,7 @@
 use std::{
     cmp::min,
     collections::{HashMap, HashSet},
-    fs,
+    fs, u64,
 };
 
 fn calc_next_position(first: (u32, u32), second: (i32, i32)) -> (u32, u32) {
@@ -113,7 +113,7 @@ fn recursion(
     return best_value;
 }
 
-fn part1(input: &str) -> u64 {
+fn part1_first_attempt(input: &str) -> u64 {
     let mut walls: HashSet<(u32, u32)> = HashSet::new();
 
     let mut inter_result: HashMap<(u32, u32), u64> = HashMap::new();
@@ -150,6 +150,46 @@ fn part1(input: &str) -> u64 {
 
     return best_value;
     // return 0;
+}
+
+fn part1(input: &str) -> u32 {
+    let mut walls: HashSet<(usize, usize)> = HashSet::new();
+
+    let mut end: u64 = 40000;
+
+    let mut start_position: (usize, usize) = (0, 0);
+    let mut end_position: (usize, usize) = (0, 0);
+
+    let mut costs: HashMap<(usize, usize, usize), u64> = HashMap::new();
+    let mut prev: HashMap<(usize, usize, usize), (usize, usize, usize)> = HashMap::new();
+    let mut vertices: Vec<(usize, usize)> = vec![];
+
+    let directions: [(i32, i32); 4] = [(0, 1), (-1, 0), (0, -1), (1, 0)];
+    let direction_index: usize = 0;
+
+    for (line_index, line) in fs::read_to_string(input).unwrap().lines().enumerate() {
+        for (c_index, c) in line.chars().enumerate() {
+            if c == '#' {
+                walls.insert((line_index as usize, c_index as usize));
+            } else if c == 'E' {
+                end_position = (line_index as usize, c_index as usize);
+            } else if c == 'S' {
+                start_position = (line_index as usize, c_index as usize);
+                for i in 0..4 {
+                    costs.insert((line_index, c_index, i), 0);
+                }
+            } else if c == '.' {
+                for i in 0..4 {
+                    costs.insert((line_index, c_index, i), u64::max_value());
+                }
+                vertices.push((line_index, c_index));
+            }
+        }
+    }
+    while vertices.len() > 0 {
+
+    }
+    return 0;
 }
 
 fn main() {
