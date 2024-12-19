@@ -6,7 +6,6 @@ use std::{
 };
 
 fn recursion_part1(combination: String, towels: &HashSet<&str>, max_len: usize) -> bool {
-    // println!("{}", combination);
     if combination.len() == 0 {
         return true;
     }
@@ -16,7 +15,7 @@ fn recursion_part1(combination: String, towels: &HashSet<&str>, max_len: usize) 
         let this_slice: &str = &combination[0..i];
 
         match towels.get(this_slice) {
-            Some(res) => {
+            Some(_res) => {
                 return_value = return_value
                     | recursion_part1(
                         combination.trim_start_matches(this_slice).to_string(),
@@ -44,7 +43,6 @@ fn part1(input: &str) -> u32 {
     let re = Regex::new(r"\w+").unwrap();
 
     let mut towels: HashSet<&str> = HashSet::new();
-    let mut combinations: Vec<String> = vec![];
 
     let mut longest_towel: usize = 0;
     for towel in re.find_iter(&parts[0]) {
@@ -55,7 +53,7 @@ fn part1(input: &str) -> u32 {
     }
 
     let mut result: u32 = 0;
-    for (line_index, line) in parts[1].lines().enumerate() {
+    for line in parts[1].lines() {
         if recursion_part1(line.to_string(), &towels, longest_towel) {
             result += 1;
         }
@@ -82,7 +80,7 @@ fn recursion_part2<'a>(
         let this_slice: &str = &combination[0..i];
 
         match towels.get(this_slice) {
-            Some(res) => {
+            Some(_res) => {
                 inner_result = inner_result
                     + recursion_part2(&combination[i..], towels, max_len, memo);
             }
@@ -103,7 +101,6 @@ fn part2(input: &str) -> u64 {
     let re = Regex::new(r"\w+").unwrap();
 
     let mut towels: HashSet<&str> = HashSet::new();
-    let mut combinations: Vec<String> = vec![];
 
     let mut longest_towel: usize = 0;
     for towel in re.find_iter(&parts[0]) {
@@ -116,16 +113,12 @@ fn part2(input: &str) -> u64 {
     let mut memo: HashMap<&str, u64> = HashMap::new();
 
     let mut result: u64 = 0;
-    for (line_index, line) in parts[1].lines().enumerate() {
+    for line in parts[1].lines() {
         let rec_result = recursion_part2(line, &towels, longest_towel, &mut memo);
-        println!("{}", rec_result);
         result += rec_result;
     }
     return result;
 
-    // TEST PURPOSES
-    // let rec_result =  recursion_part2("rrbgbr".to_string(), &towels, longest_towel);
-    // return rec_result
 }
 fn main() {
     println!("part1: {}", part1("input.txt"));
