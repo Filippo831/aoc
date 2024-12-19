@@ -1,6 +1,9 @@
 use regex::Regex;
-use std::{cmp::min, collections::HashSet, fs, os::unix::fs::PermissionsExt};
-use cached::proc_macro::cached;
+use std::{
+    cmp::min,
+    collections::{HashMap, HashSet},
+    fs,
+};
 
 fn recursion_part1(combination: String, towels: &HashSet<&str>, max_len: usize) -> bool {
     // println!("{}", combination);
@@ -61,31 +64,36 @@ fn part1(input: &str) -> u32 {
     return result;
 }
 
-fn recursion_part2(combination: String, towels: &HashSet<&str>, max_len: usize) -> u32 {
+fn recursion_part2<'a>(
+    combination: &'a str,
+    towels: &HashSet<&str>,
+    max_len: usize,
+    memo: &mut HashMap<&'a str, u64>,
+) -> u64 {
+    if let Some(value) = memo.get(&combination) {
+        return *value;
+    }
     if combination.len() == 0 {
         return 1;
     }
 
-    let mut inner_result: u32 = 0;
+    let mut inner_result: u64 = 0;
     for i in 1..min(max_len, combination.len()) + 1 {
         let this_slice: &str = &combination[0..i];
 
         match towels.get(this_slice) {
             Some(res) => {
                 inner_result = inner_result
-                    + recursion_part2(
-                        combination[i..].to_string(),
-                        towels,
-                        max_len,
-                    );
+                    + recursion_part2(&combination[i..], towels, max_len, memo);
             }
             None => {}
         }
     }
 
+    memo.insert(&combination, inner_result);
     return inner_result;
 }
-fn part2(input: &str) -> u32 {
+fn part2(input: &str) -> u64 {
     let parts: Vec<String> = fs::read_to_string(input)
         .unwrap()
         .split("\n\n")
@@ -105,14 +113,16 @@ fn part2(input: &str) -> u32 {
         }
     }
 
-    let mut result: u32 = 0;
+    let mut memo: HashMap<&str, u64> = HashMap::new();
+
+    let mut result: u64 = 0;
     for (line_index, line) in parts[1].lines().enumerate() {
-        let rec_result =  recursion_part2(line.to_string(), &towels, longest_towel);
+        let rec_result = recursion_part2(line, &towels, longest_towel, &mut memo);
         println!("{}", rec_result);
         result += rec_result;
     }
     return result;
-    
+
     // TEST PURPOSES
     // let rec_result =  recursion_part2("rrbgbr".to_string(), &towels, longest_towel);
     // return rec_result
