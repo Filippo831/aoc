@@ -129,6 +129,8 @@ fn part1_first_attempt(input: &str) -> u64 {
         for (c_index, c) in line.chars().enumerate() {
             if c == '#' {
                 walls.insert((line_index as u32, c_index as u32));
+            } else if c == '.' {
+                walls.insert((line_index as u32, c_index as u32));
             } else if c == 'E' {
                 end_position = (line_index as u32, c_index as u32);
             } else if c == 'S' {
@@ -152,17 +154,33 @@ fn part1_first_attempt(input: &str) -> u64 {
     // return 0;
 }
 
+fn calc_next_position_second_attempt(
+    current: (usize, usize),
+    direction: (i32, i32),
+    size: usize,
+) -> Result<(usize, usize), String> {
+    let next_position = (
+        (current.0 as i32 + direction.0) as usize,
+        (current.1 as i32 + direction.1) as usize,
+    );
+
+    if next_position.0 >= size || next_position.1 >= size {
+        return Err("out of bounds".to_string());
+    }
+    return Ok(next_position);
+}
+
+
 fn part1(input: &str) -> u32 {
     let mut walls: HashSet<(usize, usize)> = HashSet::new();
-
-    let mut end: u64 = 40000;
 
     let mut start_position: (usize, usize) = (0, 0);
     let mut end_position: (usize, usize) = (0, 0);
 
-    let mut costs: HashMap<(usize, usize, usize), u64> = HashMap::new();
-    let mut prev: HashMap<(usize, usize, usize), (usize, usize, usize)> = HashMap::new();
-    let mut vertices: Vec<(usize, usize)> = vec![];
+    let mut vertex_direction: HashMap<(usize, usize), usize> = HashMap::new();
+    let mut costs: HashMap<(usize, usize), u64> = HashMap::new();
+    let mut prev: HashMap<(usize, usize), (usize, usize)> = HashMap::new();
+    let mut vertices: HashSet<(usize, usize)> = HashSet::new();
 
     let directions: [(i32, i32); 4] = [(0, 1), (-1, 0), (0, -1), (1, 0)];
     let direction_index: usize = 0;
@@ -175,18 +193,54 @@ fn part1(input: &str) -> u32 {
                 end_position = (line_index as usize, c_index as usize);
             } else if c == 'S' {
                 start_position = (line_index as usize, c_index as usize);
-                for i in 0..4 {
-                    costs.insert((line_index, c_index, i), 0);
-                }
+                costs.insert((line_index, c_index), 0);
+                vertex_direction.insert((line_index, c_index), 0);
             } else if c == '.' {
-                for i in 0..4 {
-                    costs.insert((line_index, c_index, i), u64::max_value());
-                }
-                vertices.push((line_index, c_index));
+                costs.insert((line_index, c_index), u64::max_value());
+                vertices.insert((line_index, c_index));
             }
         }
     }
+
+    let size = fs::read_to_string(input).unwrap().lines().collect::<Vec<&str>>().len();
+
     while vertices.len() > 0 {
+        let mut smallest_distance: u64 = u64::max_value();
+        let mut current_v: (usize, usize) = (0,0);
+        for v in &vertices {
+            if let Some(value) = costs.get(&v) {
+                if *value < smallest_distance {
+                    smallest_distance = *value;
+                    current_v = *v;
+                }
+            }
+        }
+        vertices.remove(&current_v);
+
+        for (d_index, direction) in directions.iter().enumerate() {
+            match calc_next_position_second_attempt(current_v, *direction, size) {
+                Ok(next_position) => match vertices.get(&next_position) {
+                    Some(pos) => match costs.get(pos) {
+                        Some(cost) => {
+                            let mut next_cost = cost;
+                            let Some(v_direction) = vertex_direction.get(&current_v);
+                            if direction != v_direction {
+                                next_cost += 1000;
+                            } else {
+                                next_cost += 1;
+                            }
+                            if next_cost < *cost {
+                                costs.insert(*pos, next_cost);
+                                prev.insert(*pos, current_v);
+                            }
+                        }
+                        None => {}
+                    },
+                    None => {}
+                },
+                Err(str) => {}
+            }
+        }
 
     }
     return 0;
