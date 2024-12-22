@@ -9,6 +9,11 @@ fn calculate_string_numbers(map: &HashMap<char, (usize, usize)>, start: char, en
     let x_offset: i32 = end_position.0 as i32 - start_position.0 as i32;
     let y_offset: i32 = end_position.1 as i32 - start_position.1 as i32;
     if y_offset < 0 {
+    if x_offset < 0 {
+        for i in 0..x_offset.abs() {
+            output_string += "<";
+        }
+    }
         for i in 0..y_offset.abs() {
             output_string += "^";
         }
@@ -21,11 +26,6 @@ fn calculate_string_numbers(map: &HashMap<char, (usize, usize)>, start: char, en
     if x_offset > 0 {
         for i in 0..x_offset {
             output_string += ">";
-        }
-    }
-    if x_offset < 0 {
-        for i in 0..x_offset.abs() {
-            output_string += "<";
         }
     }
     output_string += "A";
@@ -39,6 +39,16 @@ fn calculate_string_movements(map: &HashMap<char, (usize, usize)>, start: char, 
 
     let x_offset: i32 = end_position.0 as i32 - start_position.0 as i32;
     let y_offset: i32 = end_position.1 as i32 - start_position.1 as i32;
+    if x_offset < 0 {
+        for i in 0..x_offset.abs() {
+            output_string += "<";
+        }
+    }
+    if y_offset < 0 {
+        for i in 0..y_offset.abs() {
+            output_string += "^";
+        }
+    }
     if y_offset > 0 {
         for i in 0..y_offset {
             output_string += "v";
@@ -47,16 +57,6 @@ fn calculate_string_movements(map: &HashMap<char, (usize, usize)>, start: char, 
     if x_offset > 0 {
         for i in 0..x_offset {
             output_string += ">";
-        }
-    }
-    if y_offset < 0 {
-        for i in 0..y_offset.abs() {
-            output_string += "^";
-        }
-    }
-    if x_offset < 0 {
-        for i in 0..x_offset.abs() {
-            output_string += "<";
         }
     }
     output_string += "A";
@@ -102,7 +102,7 @@ fn part1(input: &str, n_people: u32) -> u64 {
             this_position = char;
         }
         // println!("{}: {}", line, new_combination);
-        for i in 0..n_people - 2 {
+        for i in 0..n_people - 1 {
             old_combination = new_combination.to_string();
             new_combination = "".to_string();
             this_position = 'A';
