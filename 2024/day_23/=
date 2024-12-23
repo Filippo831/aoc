@@ -1,0 +1,32 @@
+use std::{collections::{HashMap, HashSet}, fs};
+
+fn part1(input: &str) -> u32 {
+    let mut connection: HashMap<&str, &HashSet<&str>> = HashMap::new();
+
+    for line in fs::read_to_string(input).unwrap().lines() {
+        let parts = line.split("-").collect::<Vec<&str>>();
+        match connection.get(&parts[0]) {
+            Some(value) => {
+                value.insert(parts[1]);
+            }
+            None => {connection.insert(parts[0], &mut HashSet::from([parts[1]]));}
+        }
+        // connection.insert((parts[0], parts[1]));
+        // connection.insert((parts[1], parts[0]));
+    }
+    return 0;
+}
+
+fn main() {
+    println!("part1: {}", part1("input.txt"))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_part1() {
+        assert_eq!(part1("input_test.txt"), 7)
+    }
+}
