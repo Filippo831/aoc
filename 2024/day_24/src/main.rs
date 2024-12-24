@@ -38,36 +38,46 @@ fn part1(input: &str) -> u64 {
         let things: Vec<&str> = re.find_iter(line).map(|e| e.as_str()).collect();
         expressions.insert(things);
     }
-    loop {
-        for things in &expressions {
-            if let Some(left_value) = &variables.get(things[0]).clone() {
-                if let Some(right_value) = &variables.get(things[2]).clone() {
-                    if things[3].starts_with("z") {
-                        z_values.push(things[3]);
+    while (expressions).len() > 0 {
+        for el in expressions.clone() {
+            if let Some(left_value) = variables.get(el[0]) {
+                if let Some(right_value) = variables.get(el[2]) {
+                    if el[3].starts_with("z") {
+                        z_values.push(el[3]);
                     }
-                    if things[1] == "XOR" {
-                        variables.insert(things[3], *left_value ^ *right_value);
+                    let mut result = true;
+                    if el[1] == "AND" {
+                        result = left_value & right_value;
                     }
-                    if things[1] == "AND" {
-                        variables.insert(things[3], *left_value & *right_value);
+                    if el[1] == "OR" {
+                        result = left_value | right_value;
                     }
-                    if things[1] == "OR" {
-                        variables.insert(things[3], *left_value | *right_value);
+                    if el[1] == "XOR" {
+                        result = left_value ^ right_value;
                     }
+                    variables.insert(el[3], result);
+                    expressions.remove(&el);
                 }
             }
         }
-        if expressions.len() == 0 {
-            break;
-        }
     }
-    dbg!("{:?}", variables);
+    z_values.sort();
+    let mut final_result:u64 = 0;
+    let mut el_index: usize = 0;
+    for el in z_values.iter_mut() {
+        let is_true: bool = *variables.get(el).unwrap();
+        if is_true {
+            let two: u64 = 2;
+            final_result += two.pow(el_index as u32) as u64;
+        }
+        el_index += 1;
+    }
 
-    return 0;
+    return final_result;
 }
 
 fn main() {
-    println!("{}", part1("input_test.txt"))
+    println!("{}", part1("input.txt"))
 }
 
 #[cfg(test)]
@@ -76,6 +86,6 @@ mod tests {
 
     #[test]
     fn test_part1() {
-        assert_eq!(part1("input.txt"), 2024)
+        assert_eq!(part1("input_test.txt"), 2024)
     }
 }
