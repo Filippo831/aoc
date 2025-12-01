@@ -22,19 +22,35 @@ fn part2(input: &str) -> u32 {
     let mut zero_pass: u32 = 0;
     for line in fs::read_to_string(input).unwrap().lines() {
         let line_value = line[1..].parse::<i32>().unwrap();
-        if line.chars().nth(0).unwrap() == 'R' {
-            position = position + line_value;
-            zero_pass = zero_pass + (position / 100) as u32;
-            position = position % 100;
-        } else {
-            if position == 0 {
-                zero_pass = zero_pass + (line_value / 100).abs() as u32;
-                position = (position - line_value) % 100;
-            } else {
-                if line_value >= position {
-                    zero_pass = zero_pass + ((position - line_value) / 100).abs() as u32 + 1;
+        let direction = line.chars().nth(0).unwrap() == 'R';
+        
+        // if line.chars().nth(0).unwrap() == 'R' {
+        //     position = position + line_value;
+        //     zero_pass = zero_pass + (position / 100) as u32;
+        //     position = position % 100;
+        //
+        // } else {
+        //     if position == 0 {
+        //         zero_pass = zero_pass + (line_value / 100).abs() as u32;
+        //     } else {
+        //         if line_value >= position {
+        //             zero_pass = zero_pass + ((line_value - position) / 100).abs() as u32 + 1;
+        //         }
+        //     }
+        //     position = (position - line_value) % 100;
+        // }
+        for n in 0..line_value {
+            if (direction) {
+                position = (position + 1) % 100;
+                if position == 0 {
+                    zero_pass = zero_pass + 1;
                 }
-                position = (position - line_value) % 100;
+            } else {
+                position = (position - 1) % 100;
+                if position == 0 {
+                    zero_pass = zero_pass + 1;
+                }
+
             }
         }
     }
