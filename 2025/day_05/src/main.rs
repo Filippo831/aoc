@@ -45,47 +45,52 @@ fn part2(input: &str) -> u64 {
         })
         .collect();
 
-    for index_first in 0..rules.len() {
-        if index_first >= rules.len() {
-            break;
-        }
-        let mut low = rules[index_first].0;
-        let mut high = rules[index_first].1;
-
-        for index_second in index_first + 1..rules.len() {
-            if index_second >= rules.len() {
+    let mut prev_total: u64 = 0;
+    for _index in 0..400{
+        for index_first in 0..rules.len() {
+            if index_first >= rules.len() {
                 break;
             }
+            let mut low = rules[index_first].0;
+            let mut high = rules[index_first].1;
 
-            if rules[index_second].0 <= low
-                && rules[index_second].1 <= high
-                && rules[index_second].1 >= low
-            {
-                low = rules[index_second].0;
-                rules.remove(index_second);
+            for index_second in index_first + 1..rules.len() {
+                if index_second >= rules.len() {
+                    break;
+                }
 
-            } else if rules[index_second].1 >= high
-                && rules[index_second].0 <= high
-                && rules[index_second].0 >= low
-            {
-                high = rules[index_second].1;
-                rules.remove(index_second);
-
-            } else if rules[index_second].1 >= high && rules[index_second].0 <= low {
-                low = rules[index_second].0;
-                high = rules[index_second].1;
-                rules.remove(index_second);
+                if rules[index_second].0 <= low
+                    && rules[index_second].1 <= high
+                    && rules[index_second].1 >= low
+                {
+                    low = rules[index_second].0;
+                    rules.remove(index_second);
+                } else if rules[index_second].1 >= high
+                    && rules[index_second].0 <= high
+                    && rules[index_second].0 >= low
+                {
+                    high = rules[index_second].1;
+                    rules.remove(index_second);
+                } else if rules[index_second].1 >= high && rules[index_second].0 <= low {
+                    low = rules[index_second].0;
+                    high = rules[index_second].1;
+                    rules.remove(index_second);
+                }
             }
+            rules[index_first].0 = low;
+            rules[index_first].1 = high;
         }
-        rules[index_first].0 = low;
-        rules[index_first].1 = high;
+        let mut total: u64 = 0;
+        for r in &rules {
+            total = total + r.1 - r.0 + 1;
+        }
+        if total == prev_total {
+            break;
+        } else {
+            prev_total = total;
+        }
     }
-    let mut total: u64 = 0;
-    for r in rules {
-        total = total + r.1 - r.0;
-    }
-
-    return total;
+    return prev_total;
 }
 
 fn main() {
