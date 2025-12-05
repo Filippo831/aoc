@@ -51,24 +51,26 @@ fn part2(input: &str) -> u64 {
         }
         let mut low = rules[index_first].0;
         let mut high = rules[index_first].1;
-        dbg!("{}", &rules);
 
-        for index_second in 0..rules.len() {
+        for index_second in index_first + 1..rules.len() {
             if index_second >= rules.len() {
                 break;
             }
+
             if rules[index_second].0 <= low
                 && rules[index_second].1 <= high
                 && rules[index_second].1 >= low
             {
                 low = rules[index_second].0;
                 rules.remove(index_second);
+
             } else if rules[index_second].1 >= high
                 && rules[index_second].0 <= high
                 && rules[index_second].0 >= low
             {
                 high = rules[index_second].1;
                 rules.remove(index_second);
+
             } else if rules[index_second].1 >= high && rules[index_second].0 <= low {
                 low = rules[index_second].0;
                 high = rules[index_second].1;
