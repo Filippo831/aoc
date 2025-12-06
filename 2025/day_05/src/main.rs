@@ -46,14 +46,16 @@ fn part2(input: &str) -> u64 {
         .collect();
 
     let mut prev_total: u64 = 0;
-    for _index in 0..400{
-        for index_first in 0..rules.len() {
-            if index_first >= rules.len() {
-                break;
-            }
+
+    for _index in 0..400 {
+        let mut index_first = 0;
+        let mut ranges: Vec<(u64, u64)> = vec![];
+
+        while index_first < rules.len() {
             let mut low = rules[index_first].0;
             let mut high = rules[index_first].1;
 
+            let mut to_delete: Vec<usize> = vec![];
             for index_second in index_first + 1..rules.len() {
                 if index_second >= rules.len() {
                     break;
@@ -64,24 +66,31 @@ fn part2(input: &str) -> u64 {
                     && rules[index_second].1 >= low
                 {
                     low = rules[index_second].0;
-                    rules.remove(index_second);
+                    to_delete.push(index_second);
                 } else if rules[index_second].1 >= high
                     && rules[index_second].0 <= high
                     && rules[index_second].0 >= low
                 {
                     high = rules[index_second].1;
-                    rules.remove(index_second);
-                } else if rules[index_second].1 >= high && rules[index_second].0 <= low {
+                    to_delete.push(index_second);
+                } else if rules[index_second].0 <= low && rules[index_second].1 >= high {
                     low = rules[index_second].0;
                     high = rules[index_second].1;
-                    rules.remove(index_second);
+                    to_delete.push(index_second);
                 }
             }
-            rules[index_first].0 = low;
-            rules[index_first].1 = high;
+
+            // rules[index_first].0 = low;
+            // rules[index_first].1 = high;
+            ranges.push((low, high));
+            for delete in to_delete.iter().rev() {
+                rules.remove(*delete);
+            }
+            index_first = index_first + 1;
         }
+
         let mut total: u64 = 0;
-        for r in &rules {
+        for r in &ranges {
             total = total + r.1 - r.0 + 1;
         }
         if total == prev_total {
