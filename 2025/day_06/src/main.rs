@@ -33,7 +33,25 @@ fn part2(input: &str) -> u64 {
     let mut operator: u8 = 0; // 0: nothing, 1: *, 2: +
     let mut previous_end: usize = 0;
     let mut end = false;
-    for index in 0..3738 {
+    for index in 0..content[0].len() {
+        if !end {
+            end = true;
+            for row_index in 0..content.len() - 1 {
+                let found_char = content[row_index].chars().nth(index).unwrap();
+                if found_char != ' ' {
+                    end = false;
+                }
+            }
+            let operator_symbol = content[content.len() - 1].chars().nth(index).unwrap();
+            if operator_symbol == '*' {
+                operator = 1;
+            } else if operator_symbol == '+' {
+                operator = 2;
+            }
+            if index == content[0].len() - 1 {
+                end = true;
+            }
+        }
         if end {
             let mut intermediate_result = 1;
             if operator == 1 {
@@ -41,7 +59,11 @@ fn part2(input: &str) -> u64 {
             } else if operator == 2 {
                 intermediate_result = 0;
             }
-            for reverse in (previous_end..index).rev() {
+            let mut end_point = index;
+            if index == content[0].len() - 1 {
+                end_point = index+1;
+            }
+            for reverse in (previous_end..end_point).rev() {
                 let mut number: String = "".to_string();
                 for row_index in 0..content.len() - 1 {
                     let found_char = content[row_index].chars().nth(reverse).unwrap();
@@ -54,24 +76,12 @@ fn part2(input: &str) -> u64 {
                 } else if operator == 2 {
                     intermediate_result = intermediate_result + number.parse::<u64>().unwrap();
                 }
-                previous_end = index;
             }
+            end = false;
             operator = 0;
+
             results.push(intermediate_result);
-        } else {
-            end = true;
-            for row_index in 0..content.len() - 1 {
-                let found_char = content[row_index].chars().nth(index).unwrap();
-                if found_char.is_digit(10) {
-                    end = false;
-                }
-            }
-            let operator_symbol = content[content.len() - 1].chars().nth(index).unwrap();
-            if operator_symbol == '*' {
-                operator = 1;
-            } else if operator_symbol == '+' {
-                operator = 2;
-            }
+            previous_end = index + 1;
         }
     }
     return results.iter().sum();
@@ -95,6 +105,6 @@ mod tests {
 
     #[test]
     fn test_part2() {
-        assert_eq!(part2("input_test.txt"), 14);
+        assert_eq!(part2("input_test.txt"), 3263827);
     }
 }
