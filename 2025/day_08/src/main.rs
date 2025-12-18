@@ -1,77 +1,158 @@
 use std::{collections::HashMap, fs};
 
-fn part1(input: &str) -> u64 {
+fn part1(input: &str, upper_bound: u32) -> u64 {
     let content: Vec<Vec<u32>> = fs::read_to_string(input)
         .unwrap()
         .lines()
         .map(|l| l.split(",").map(|e| e.parse::<u32>().unwrap()).collect())
         .collect();
 
-    let mut pair_distance: HashMap<u32, (usize, usize)> = HashMap::new();
+    let mut distances: HashMap<u64, Vec<(usize, usize)>> = HashMap::new();
 
-    // calucalte distances
     for first_index in 0..content.len() {
-        let mut min_distance: u32 = u32::max_value();
-        let mut pair: (usize, usize) = (0, 0);
-        for second_index in 0..content.len() {
-            if first_index != second_index {
-                let mut distance = 0;
-                for axis in 0..3 {
-                    distance = distance
-                        + (content[first_index][axis] as i32 - content[second_index][axis] as i32)
-                            .pow(2) as u32;
-                }
-                if distance < min_distance && !pair_distance.contains_key(&distance) {
-                    min_distance = distance;
-                    pair = (first_index, second_index);
+        for second_index in first_index + 1..content.len() {
+            let mut distance: u64 = 0;
+            for axis in 0..3 {
+                distance = distance
+                    + (content[first_index][axis] as i64 - content[second_index][axis] as i64)
+                        .pow(2) as u64;
+            }
+            distances
+                .entry(distance)
+                .or_insert_with(Vec::new)
+                .push((first_index, second_index));
+        }
+    }
+
+    let mut sorted_distances: Vec<&u64> = Vec::from_iter(distances.keys());
+    sorted_distances.sort();
+
+    let mut index_to_groups: [u32; 1000] = [0; 1000];
+    let mut group_index: u32 = 1;
+    let mut index: u32 = 0;
+
+    while index < upper_bound {
+        let distance = sorted_distances.get(index as usize).unwrap();
+
+        for el in distances.get(distance).unwrap() {
+            if index_to_groups[el.0] == 0 && index_to_groups[el.1] == 0 {
+                index_to_groups[el.0] = group_index;
+                index_to_groups[el.1] = group_index;
+                group_index = group_index + 1;
+            } else if index_to_groups[el.0] == 0 {
+                index_to_groups[el.0] = index_to_groups[el.1];
+            } else if index_to_groups[el.1] == 0 {
+                index_to_groups[el.1] = index_to_groups[el.0];
+            } else {
+                let reference_group = index_to_groups[el.0];
+                for value in 0..index_to_groups.len() {
+                    if index_to_groups[value] == reference_group {
+                        index_to_groups[value] = index_to_groups[el.1];
+                    }
                 }
             }
-        }
-        pair_distance.insert(min_distance, pair);
-    }
 
-    let mut ordered_distance: Vec<&u32> = pair_distance.keys().collect();
-    ordered_distance.sort();
-    // for i in 0..20 {
-    //     let pair = &pair_distance.get(ordered_distance[i]).unwrap();
-    //     dbg!("{} : {}", &ordered_distance[i], (&content[pair.0], &content[pair.1]));
-    // }
-
-    let mut groups: [u32; 1000] = [0; 1000];
-    let mut pair_numbers = 1;
-
-    for el in 0..10 {
-        let couple: &(usize, usize) = pair_distance.get(ordered_distance[el]).unwrap();
-
-        if groups[couple.0] == 0 && groups[couple.1] == 0 {
-            groups[couple.0] = pair_numbers;
-            groups[couple.1] = pair_numbers;
-            pair_numbers = pair_numbers + 1;
-        } else if groups[couple.0] != 0 && groups[couple.1] == 0 {
-            groups[couple.1] = groups[couple.0];
-        } else if groups[couple.1] != 0 && groups[couple.0] == 0 {
-            groups[couple.0] = groups[couple.1];
+            index = index + 1;
         }
     }
 
-    let mut sizes: Vec<u32> = vec![0; pair_numbers as usize];
-    for index in 0..1000 {
-        if groups[index] != 0 {
-            sizes[groups[index] as usize] += 1;
+    let mut lengths: Vec<u32> = vec![0; 1000];
+
+    for value in index_to_groups {
+        if value != 0 {
+            lengths[value as usize] += 1;
         }
     }
-    sizes.sort();
-    sizes.reverse();
-    dbg!("{}", &sizes);
-    return (sizes[0] * sizes[1] * sizes[2]) as u64;
+
+    lengths.sort();
+    lengths.reverse();
+    dbg!("{}", &lengths[0..10]);
+
+    return (lengths[0] * lengths[1] * lengths[2]) as u64;
 }
 
 fn part2(input: &str) -> u64 {
-    return 0;
+    let content: Vec<Vec<u64>> = fs::read_to_string(input)
+        .unwrap()
+        .lines()
+        .map(|l| l.split(",").map(|e| e.parse::<u64>().unwrap()).collect())
+        .collect();
+
+    let mut distances: HashMap<u64, Vec<(usize, usize)>> = HashMap::new();
+
+    for first_index in 0..content.len() {
+        for second_index in first_index + 1..content.len() {
+            let mut distance: u64 = 0;
+            for axis in 0..3 {
+                distance = distance
+                    + (content[first_index][axis] as i64 - content[second_index][axis] as i64)
+                        .pow(2) as u64;
+            }
+            distances
+                .entry(distance)
+                .or_insert_with(Vec::new)
+                .push((first_index, second_index));
+        }
+    }
+
+    let mut sorted_distances: Vec<&u64> = Vec::from_iter(distances.keys());
+    sorted_distances.sort();
+
+    let mut index_to_groups: [u32; 1000] = [0; 1000];
+    let mut group_index: u32 = 1;
+    let mut index: u32 = 0;
+    let mut zero_number = content.len();
+    let mut result: u64 = 0;
+
+    loop {
+        let distance = sorted_distances.get(index as usize).unwrap();
+
+        for el in distances.get(distance).unwrap() {
+            if index_to_groups[el.0] == 0 && index_to_groups[el.1] == 0 {
+                index_to_groups[el.0] = group_index;
+                index_to_groups[el.1] = group_index;
+                group_index = group_index + 1;
+                zero_number = zero_number - 2;
+            } else if index_to_groups[el.0] == 0 {
+                index_to_groups[el.0] = index_to_groups[el.1];
+                zero_number = zero_number - 1;
+            } else if index_to_groups[el.1] == 0 {
+                index_to_groups[el.1] = index_to_groups[el.0];
+                zero_number = zero_number - 1;
+            } else {
+                let reference_group = index_to_groups[el.0];
+                for value in 0..index_to_groups.len() {
+                    if index_to_groups[value] == reference_group {
+                        index_to_groups[value] = index_to_groups[el.1];
+                    }
+                }
+            }
+            result = content[el.0][0] * content[el.1][0];
+
+            index = index + 1;
+        }
+        if zero_number == 0 {
+            break
+        }
+    }
+
+    // let mut lengths: Vec<u32> = vec![0; 1000];
+    //
+    // for value in index_to_groups {
+    //     if value != 0 {
+    //         lengths[value as usize] += 1;
+    //     }
+    // }
+    //
+    // lengths.sort();
+    // lengths.reverse();
+    // dbg!("{}", &lengths[0..10]);
+
+    return result as u64;
 }
 
 fn main() {
-    let result_part1 = part1("input.txt");
+    let result_part1 = part1("input.txt", 1000);
     println!("{}", result_part1);
     let result_part2 = part2("input.txt");
     println!("{}", result_part2);
@@ -83,11 +164,11 @@ mod tests {
 
     #[test]
     fn test_part1() {
-        assert_eq!(part1("input_test.txt"), 40);
+        assert_eq!(part1("input_test.txt", 10), 40);
     }
 
     #[test]
     fn test_part2() {
-        assert_eq!(part2("input_test.txt"), 3263827);
+        assert_eq!(part2("input_test.txt"), 25272);
     }
 }
