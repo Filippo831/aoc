@@ -35,16 +35,38 @@ fn part2(input: &str) -> u64 {
 
     for index_first in 0..content.len() {
         for index_second in index_first..content.len() {
-            let temp_largest: u64 = ((content[index_first].0 - content[index_second].0).abs()
-                * (content[index_first].1 - content[index_second].1).abs())
-                as u64;
+            let first = &content[index_first];
+            let second = &content[index_second];
+            let temp_largest: u64 = ((first.0 - second.0).abs() * (first.1 - second.1).abs()) as u64;
 
             if temp_largest < largest {
                 break;
             } else {
                 let mut corners: [(i64, i64); 4] = [(0,0); 4];
-                corners[0] = content[index_first];
+                corners[0] = *first;
+                corners[2] = *second;
 
+                if first.0 < second.0 && first.1 > second.1 {
+                    corners[1] = (first.0, second.1);
+                    corners[3] = (second.0, first.1);
+                } else if first.0 < second.0 && first.1 > second.1 {
+                    corners[1] = (second.0, first.1);
+                    corners[3] = (first.0, second.1);
+                } else if first.0 > second.0 && first.1 < second.1 {
+                    corners[1] = (first.0, second.1);
+                    corners[3] = (second.0, first.1);
+                } else {
+                    corners[1] = (second.0, first.1);
+                    corners[3] = (first.0, second.1);
+                }
+
+                let mut check_index = index_first;
+                for corner_index in 0..corners.len() {
+                    loop {
+                        if corner_index == 
+                        check_index = (check_index + 1) % content.len();
+                    }
+                }
             }
         }
     }
